@@ -1,0 +1,20 @@
+[
+  {
+    "Id": 1,
+    "Name": "Nguyen Thanh Trieu",
+    "DoB": "1999-10-17",
+    "Course": "Design"
+  },
+  {
+    "Id": 0,
+    "Name": "555",
+    "DoB": "2004-01-08",
+    "Course": "Design"
+  },
+  {
+    "Id": 0,
+    "Name": "gtgtrg",
+    "DoB": "2024-08-08",
+    "Course": "Design"
+  }
+]

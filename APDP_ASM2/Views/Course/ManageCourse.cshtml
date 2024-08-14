@@ -1,0 +1,67 @@
+﻿
+@{
+    ViewData["Title"] = "ManageCourse";
+    Layout = "~/Views/Shared/LayoutAdmin.cshtml";
+}
+@* <link href="~/admin.css" rel="stylesheet" /> *@
+@model IEnumerable<Course>
+@section header {
+    <header class="main-header clearfix" role="header">
+        <div class="logo">
+            <a href="#"><em>FPT</em> BTEC</a>
+        </div>
+        <a href="#menu" class="menu-link"><i class="fa fa-bars"></i></a>
+        <nav id="menu" class="main-nav" role="navigation">
+            <ul class="main-menu">
+                <li><a href="/Student/ManageStudent" class="external">Students Management</a></li>
+                <li><a href="/Teacher/ManageTeacher" class="external">Teachers Management</a></li>
+                <li><a href="/Class/ManageClass" class="external">Classes Management</a></li>
+                <li><a href="/Authentication/Logout" class="external">Logout</a></li>
+
+
+            </ul>
+        </nav>
+    </header>
+}
+<section class="content">
+    <h1 style="margin-top: 80px; color: orange;" class="text-center mb-4">Course List</h1>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Class</th>
+                    <th class="text-center">Major</th>
+                    <th class="text-center">Lecturer</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="text-center">@item.Name</td>
+                        <td class="text-center">@item.Class</td>
+                        <td class="text-center">@item.Major</td>
+                        <td class="text-center">@item.Lecturer</td>
+                        <td class="text-center">@item.Status</td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a class="btn btn-danger mr-1" href="@Url.Action("Delete","Course",new {id=item.Id})">Delete</a>
+                                <a class="btn btn-warning" href="@Url.Action("EditCourse","Course",new {id=item.Id})">Edit</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <ul class="mt-3">
+            <li>
+                <a class="btn btn-success" asp-controller="Course" asp-action="CreateCourse">New Course</a>
+            </li>
+        </ul>
+    </div>
+</section>
+
+

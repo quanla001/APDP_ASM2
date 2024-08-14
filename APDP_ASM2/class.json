@@ -1,0 +1,14 @@
+[
+  {
+    "Id": 1,
+    "ClassName": "SE05024",
+    "Major": "123",
+    "Lecturer": "Nguyen Thanh Trieu"
+  },
+  {
+    "Id": 0,
+    "ClassName": "SE45678",
+    "Major": "Marketing",
+    "Lecturer": "Nguyen ABC"
+  }
+]
