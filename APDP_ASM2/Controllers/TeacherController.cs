@@ -1,4 +1,5 @@
-﻿using APDP_ASM2.Models;
+﻿using APDP_ASM2.Helpers;
+using APDP_ASM2.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,56 +10,54 @@ namespace APDP_ASM2.Controllers
     [Authorize]
     public class TeacherController : Controller
     {
-        static List<Teacher> teachers = new List<Teacher>();
-
-        // Delete method
         public IActionResult Delete(int id)
         {
-            var teachers = LoadTeachersFromFile("teacher.json");
+            var teachers = FileHelper.LoadFromFile<List<Teacher>>("teacher.json");
+            var searchTeacher = teachers?.FirstOrDefault(t => t.Id == id);
 
-            var searchTeacher = teachers.FirstOrDefault(t => t.Id == id);
-            if (searchTeacher == null)
+            if (searchTeacher != null)
             {
-                return NotFound(); // Return a 404 error if the teacher is not found
+                teachers.Remove(searchTeacher);
+                FileHelper.SaveToFile("teacher.json", teachers);
             }
-
-            teachers.Remove(searchTeacher);
-
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(teachers, options);
-            System.IO.File.WriteAllText("teacher.json", jsonString);
 
             return RedirectToAction("ManageTeacher");
         }
 
-        [HttpPost]
-        public IActionResult Save(int id, Teacher teacher)
+        [HttpGet]
+        public IActionResult EditTeacher(int id)
         {
-            if (ModelState.IsValid)
+            var teachers = FileHelper.LoadFromFile<List<Teacher>>("teacher.json");
+            var teacher = teachers.FirstOrDefault(s => s.Id == id);
+
+            if (teacher == null)
             {
-                var teachers = LoadTeachersFromFile("teacher.json");
-                var existingTeacher = teachers.FirstOrDefault(t => t.Id == id);
-                if (existingTeacher == null)
-                {
-                    return NotFound(); // Return a 404 error if the teacher is not found
-                }
-
-                existingTeacher.Name = teacher.Name;
-                existingTeacher.DoB = teacher.DoB;
-                existingTeacher.Course = teacher.Course;
-
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize(teachers, options);
-                System.IO.File.WriteAllText("teacher.json", jsonString);
-
-                return RedirectToAction("ManageTeacher");
+                return View("NotFound");
             }
-            else
+
+            PopulateViewBags();
+            return View(teacher);
+        }
+
+        [HttpPost]
+        public IActionResult Save(Teacher teacher)
+        {
+            if (!ModelState.IsValid)
             {
-                List<Course> courses = LoadCourseFromFile("course.json");
-                ViewBag.SelectCourse = courses;
+                PopulateViewBags();
                 return View("EditTeacher", teacher);
             }
+
+            var teachers = FileHelper.LoadFromFile<List<Teacher>>("teacher.json");
+            var existingTeacher = teachers.FirstOrDefault(t => t.Id == teacher.Id);
+            if (existingTeacher == null) return NotFound();
+
+            existingTeacher.Name = teacher.Name;
+            existingTeacher.DoB = teacher.DoB;
+            existingTeacher.Course = teacher.Course;
+
+            FileHelper.SaveToFile("teacher.json", teachers);
+            return RedirectToAction("ManageTeacher");
         }
 
         [HttpPost]
@@ -66,126 +65,55 @@ namespace APDP_ASM2.Controllers
         {
             if (ModelState.IsValid)
             {
-                var teachers = LoadTeachersFromFile("teacher.json");
+                var teachers = FileHelper.LoadFromFile<List<Teacher>>("teacher.json") ?? new List<Teacher>();
+                teacher.Id = FileHelper.GetNextId(teachers);
                 teachers.Add(teacher);
-
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize(teachers, options);
-                System.IO.File.WriteAllText("teacher.json", jsonString);
-
+                FileHelper.SaveToFile("teacher.json", teachers);
                 return RedirectToAction("ManageTeacher");
             }
-            else
-            {
-                List<Course> courses = LoadCourseFromFile("course.json");
-                ViewBag.SelectCourse = courses;
-                return View();
-            }
+
+            PopulateViewBags();
+            return View();
         }
 
         [HttpGet]
         public IActionResult NewTeacher()
         {
-            List<Course> courses = LoadCourseFromFile("course.json");
-            ViewBag.SelectCourse = courses;
+            PopulateViewBags();
             return View();
         }
 
         [HttpGet]
-        public IActionResult EditTeacher(int id)
+        public IActionResult ManageTeacher(string searchQuery, int page = 1, int pageSize = 5)
         {
-            var teacher = LoadTeachersFromFile("teacher.json").FirstOrDefault(s => s.Id == id);
-            if (teacher == null)
+            var teachers = FileHelper.LoadFromFile<List<Teacher>>("teacher.json");
+            if (!string.IsNullOrEmpty(searchQuery))
             {
-                return NotFound(); // Return a 404 error if the teacher is not found
+                searchQuery = searchQuery.ToLower();
+                teachers = teachers.Where(c =>
+                    c.Name.ToLower().Contains(searchQuery) ||
+                    c.Course.ToLower().Contains(searchQuery)
+                ).ToList();
             }
 
-            List<Course> courses = LoadCourseFromFile("course.json");
-            ViewBag.SelectCourse = courses;
-            return View(teacher);
+            var paged = teachers
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(teachers.Count / (double)pageSize);
+            ViewBag.SearchQuery = searchQuery;
+
+            PopulateViewBags();
+            return View(paged);
         }
 
-        [HttpPost]
-        public IActionResult Edit(int id, Teacher teacher, List<Course> courses)
-        {
-            var teachers = LoadTeachersFromFile("teacher.json");
-            var existingTeacher = teachers.FirstOrDefault(t => t.Id == id);
-            if (existingTeacher == null)
-            {
-                return NotFound(); // Return a 404 error if the teacher is not found
-            }
-
-            existingTeacher.Name = teacher.Name;
-            existingTeacher.DoB = teacher.DoB;
-            existingTeacher.Course = teacher.Course;
-
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(teachers, options);
-            System.IO.File.WriteAllText("teacher.json", jsonString);
-
-            return RedirectToAction("ManageTeacher");
-        }
-
-        public List<Teacher> LoadTeachersFromFile(string fileName)
-        {
-            if (System.IO.File.Exists(fileName))
-            {
-                string readText = System.IO.File.ReadAllText(fileName);
-                return JsonSerializer.Deserialize<List<Teacher>>(readText) ?? new List<Teacher>();
-            }
-            return new List<Teacher>();
-        }
-
-        public List<Course> LoadCourseFromFile(string fileName)
-        {
-            if (System.IO.File.Exists(fileName))
-            {
-                string readText = System.IO.File.ReadAllText(fileName);
-                return JsonSerializer.Deserialize<List<Course>>(readText) ?? new List<Course>();
-            }
-            return new List<Course>();
-        }
-
-        public IActionResult Index()
+        private void PopulateViewBags()
         {
             ViewBag.UserName = HttpContext.Session.GetString("UserName");
             ViewBag.Role = HttpContext.Session.GetString("Role");
-            teachers = LoadTeachersFromFile("teacher.json");
-            return View(teachers);
-        }
-
-        public IActionResult ManageTeacher()
-        {
-            ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            ViewBag.Role = HttpContext.Session.GetString("Role");
-            teachers = LoadTeachersFromFile("teacher.json");
-            return View(teachers);
-        }
-
-        public IActionResult ViewTeacher()
-        {
-            ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            ViewBag.Role = HttpContext.Session.GetString("Role");
-            teachers = LoadTeachersFromFile("teacher.json");
-            return View(teachers);
-        }
-
-        public IActionResult ViewClass()
-        {
-            // Logic to display class information
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult Cancel(string returnUrl)
-        {
-            return RedirectToAction("ManageTeacher");
-        }
-
-        public IActionResult ViewCourse()
-        {
-            // Logic to display course information
-            return View();
+            ViewBag.SelectCourse = FileHelper.LoadFromFile<List<Course>>("course.json");
         }
     }
 }

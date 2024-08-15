@@ -3,12 +3,18 @@
     "Id": 1,
     "ClassName": "SE05024",
     "Major": "123",
-    "Lecturer": "Nguyen Thanh Trieu"
+    "Lecturer": "Nguyen Thanh"
   },
   {
-    "Id": 0,
-    "ClassName": "SE45678",
+    "Id": 3,
+    "ClassName": "SE05454",
+    "Major": "asdasd",
+    "Lecturer": "1"
+  },
+  {
+    "Id": 4,
+    "ClassName": "SE05024",
     "Major": "Marketing",
-    "Lecturer": "Nguyen ABC"
+    "Lecturer": "32"
   }
 ]

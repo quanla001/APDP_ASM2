@@ -1,6 +1,46 @@
 [
   {
-    "Id": 0,
+    "Id": 1,
+    "Name": "Binh Quan",
+    "Class": "SE05454",
+    "Major": "Marketing",
+    "Lecturer": "Nguyen Thanh Trieu",
+    "Status": "Active"
+  },
+  {
+    "Id": 2,
+    "Name": "asd",
+    "Class": "SE05024",
+    "Major": "Marketing",
+    "Lecturer": "Nguyen Thanh Trieu",
+    "Status": "Active"
+  },
+  {
+    "Id": 3,
+    "Name": "Trieu T2",
+    "Class": "SE05454",
+    "Major": "CNTT",
+    "Lecturer": "555",
+    "Status": "Inactive"
+  },
+  {
+    "Id": 4,
+    "Name": "Trieu Thanh Nguyen",
+    "Class": "SE05024",
+    "Major": "Marketing",
+    "Lecturer": "Nguyen Thanh Trieu",
+    "Status": "Active"
+  },
+  {
+    "Id": 5,
+    "Name": "gyhgjgjggjygjygj",
+    "Class": "SE05024",
+    "Major": "MARKETING",
+    "Lecturer": "Nguyen Thanh Trieu",
+    "Status": "Inactive"
+  },
+  {
+    "Id": 6,
     "Name": "Trieu Thanh Nguyen",
     "Class": "SE05024",
     "Major": "Marketing",

@@ -14,5 +14,21 @@
     "Email": "lethanhdat.2804@gmail.com",
     "Address": "QN",
     "Major": "IT"
+  },
+  {
+    "Id": 3,
+    "Name": "Trieu Thanh Nguyen",
+    "DoB": "2024-08-14",
+    "Email": "quan@gmail.com",
+    "Address": "Hanoi",
+    "Major": "Marketing"
+  },
+  {
+    "Id": 4,
+    "Name": "Binh Quan",
+    "DoB": "2024-08-02",
+    "Email": "fewbd@gmail.com",
+    "Address": "g\u1EBB",
+    "Major": "\u1EBBgr"
   }
 ]

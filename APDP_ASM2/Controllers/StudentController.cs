@@ -1,4 +1,5 @@
-﻿using APDP_ASM2.Interface;
+﻿using APDP_ASM2.Helpers;
+using APDP_ASM2.Interface;
 using APDP_ASM2.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,22 +27,45 @@ namespace APDP_ASM2.Controllers
             return RedirectToAction("ManageStudent");
         }
 
-        public IActionResult ManageStudent()
+
+        [HttpGet]
+        public IActionResult ManageStudent(string searchQuery, int page = 1, int pageSize = 5)
         {
-            ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            ViewBag.Role = HttpContext.Session.GetString("Role");
+            
             var students = _studentService.GetAllStudents();
-            return View(students);
+
+          
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                searchQuery = searchQuery.ToLower();
+                students = students.Where(c =>
+                    c.Name.ToLower().Contains(searchQuery) ||
+                    c.Major.ToLower().Contains(searchQuery) ||
+                    c.Email.ToLower().Contains(searchQuery) 
+                   
+                ).ToList();
+            }
+
+            // Implement pagination
+            var paged = students
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            // Pass data to the view
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(students.Count / (double)pageSize);
+            ViewBag.SearchQuery = searchQuery; // Pass the search query to the view
+
+            PopulateViewBags();
+            return View(paged);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Student student)
         {
-            if (student == null)
-            {
-                return BadRequest("Student object cannot be null.");
-            }
+            if (student == null) return BadRequest("Student object cannot be null.");
 
             if (ModelState.IsValid && _emailValidator.IsValid(student.Email))
             {
@@ -58,9 +82,13 @@ namespace APDP_ASM2.Controllers
             var student = _studentService.GetStudentById(id);
             if (student == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
-            return View(student);
+            else
+            {
+                PopulateViewBags();
+                return View(student);
+            }
         }
 
         [HttpPost]
@@ -71,6 +99,7 @@ namespace APDP_ASM2.Controllers
                 _studentService.UpdateStudent(student);
                 return RedirectToAction("ManageStudent");
             }
+
             return View("EditStudent", student);
         }
 
@@ -80,24 +109,30 @@ namespace APDP_ASM2.Controllers
         {
             if (ModelState.IsValid && _emailValidator.IsValid(student.Email))
             {
+                var students = _studentService.GetAllStudents() ?? new List<Student>();
+                student.Id = FileHelper.GetNextId(students);
                 _studentService.AddStudent(student);
                 return RedirectToAction("ManageStudent");
             }
+
             return View(student);
         }
 
         [HttpGet]
-        public IActionResult NewStudent()
-        {
-            return View();
-        }
+        public IActionResult NewStudent() => View();
 
         public IActionResult Index()
         {
-            ViewBag.UserName = HttpContext.Session.GetString("UserName");
-            ViewBag.Role = HttpContext.Session.GetString("Role");
+            PopulateViewBags();
             var students = _studentService.GetAllStudents();
             return View(students);
         }
+
+        private void PopulateViewBags()
+        {
+            ViewBag.UserName = HttpContext.Session.GetString("UserName");
+            ViewBag.Role = HttpContext.Session.GetString("Role");
+        }
     }
+
 }

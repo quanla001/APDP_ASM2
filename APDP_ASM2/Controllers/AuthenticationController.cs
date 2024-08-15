@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
+using APDP_ASM2.Helpers;
 
 namespace APDP_ASM2.Controllers
 {
@@ -13,43 +14,66 @@ namespace APDP_ASM2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(User user)
         {
-            if (string.IsNullOrEmpty(user.UserName))
+            if (string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(user.Pass))
             {
-                ViewBag.error = "Username cannot be empty!";
+                ViewBag.error = "Username and Password cannot be empty!";
                 return View("Login");
             }
 
-            if (string.IsNullOrEmpty(user.Pass))
-            {
-                ViewBag.error = "Password cannot be empty!";
-                return View("Login");
-            }
-
-            List<User> users = LoadUsersFromFile("users.json");
-            var result = users.Find(u => u.UserName == user.UserName);
+            var users = FileHelper.LoadFromFile<List<User>>("users.json");
+            var result = users?.FirstOrDefault(u => u.UserName == user.UserName);
 
             if (result != null && result.Pass == user.Pass)
             {
                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, result.UserName),
-                    new Claim(ClaimTypes.Role, result.Role)
-                };
-
+            {
+                new Claim(ClaimTypes.Name, result.UserName),
+                new Claim(ClaimTypes.Role, result.Role)
+            };
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
-
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
                 return RedirectToRoleDashboard(result.Role);
             }
-            else
-            {
-                ViewBag.error = "Invalid username or password!";
-                return View("Login");
-            }
+
+            ViewBag.error = "Invalid username or password!";
+            return View("Login");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult Login() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Register(User user)
+        {
+            if (!ModelState.IsValid || user.Pass != user.ConfirmPass)
+            {
+                ModelState.AddModelError("ConfirmPass", "Passwords do not match");
+                return View("Register", user);
+            }
+
+            var users = LoadFromFile<List<User>>("users.json") ?? new List<User>();
+
+            if (users.Any(u => u.UserName == user.UserName))
+            {
+                ModelState.AddModelError("UserName", "Username already exists");
+                return View("Register", user);
+            }
+
+            users.Add(user);
+            SaveToFile("users.json", users);
+            return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult Register() => View();
 
         private IActionResult RedirectToRoleDashboard(string role)
         {
@@ -62,60 +86,17 @@ namespace APDP_ASM2.Controllers
             };
         }
 
-        [HttpGet] // Chuyển từ HttpPost sang HttpGet
-        public async Task<IActionResult> Logout()
+        private T? LoadFromFile<T>(string fileName)
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
+            if (!System.IO.File.Exists(fileName)) return default;
+            var readText = System.IO.File.ReadAllText(fileName);
+            return JsonSerializer.Deserialize<T>(readText);
         }
 
-        [HttpGet]
-        public IActionResult Login()
+        private void SaveToFile<T>(string fileName, T data)
         {
-            return View();
-        }
-
-        public List<User>? LoadUsersFromFile(string fileName)
-        {
-            string readText = System.IO.File.ReadAllText(fileName);
-            return JsonSerializer.Deserialize<List<User>>(readText);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Register(User user)
-        {
-            if (ModelState.IsValid)
-            {
-                if (user.Pass != user.ConfirmPass)
-                {
-                    ModelState.AddModelError("ConfirmPass", "Passwords do not match");
-                    return View("Register", user);
-                }
-
-                List<User> users = LoadUsersFromFile("users.json");
-
-                if (users.Any(u => u.UserName == user.UserName))
-                {
-                    ModelState.AddModelError("UserName", "Username already exists");
-                    return View("Register", user);
-                }
-
-                users.Add(user);
-
-                string jsonString = JsonSerializer.Serialize(users, new JsonSerializerOptions { WriteIndented = true });
-                System.IO.File.WriteAllText("users.json", jsonString);
-
-                return RedirectToAction("Login");
-            }
-
-            return View("Register", user);
-        }
-
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
+            var jsonString = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+            System.IO.File.WriteAllText(fileName, jsonString);
         }
     }
 }
