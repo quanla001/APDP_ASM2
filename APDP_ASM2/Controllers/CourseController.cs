@@ -96,7 +96,6 @@ namespace APDP_ASM2.Controllers
                 existingCourse.Name = course.Name;
                 existingCourse.Class = course.Class;
                 existingCourse.Major = course.Major;
-                existingCourse.Lecturer = course.Lecturer;
                 existingCourse.Status = course.Status;
 
                 // Save the updated list back to the JSON file
@@ -139,7 +138,6 @@ namespace APDP_ASM2.Controllers
                 existingCourse.Name = course.Name;
                 existingCourse.Class = course.Class;
                 existingCourse.Major = course.Major;
-                existingCourse.Lecturer = course.Lecturer;
                 existingCourse.Status = course.Status;
 
                 FileHelper.SaveToFile("course.json", courses);

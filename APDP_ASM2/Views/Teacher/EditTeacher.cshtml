@@ -19,13 +19,13 @@
         </nav>
     </header>
 }
+
 <section class="content">
     <h1 class="text-center" style="color: orange; margin-top:80px;">Edit Teacher</h1>
 
-@using (Html.BeginForm("Save", "Teacher", FormMethod.Post))
-{
-
-    @Html.HiddenFor(m => m.Id)
+    @using (Html.BeginForm("Save", "Teacher", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.Id)
 
         <div class="form-group">
             @Html.LabelFor(m => m.Name, new { @class = "control-label" })
@@ -38,16 +38,23 @@
             @Html.TextBoxFor(m => m.DoB, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
             @Html.ValidationMessageFor(m => m.DoB, "", new { @class = "text-danger" })
         </div>
+
         <div class="form-group">
             @Html.LabelFor(m => m.Course, new { @class = "control-label" })
-            @Html.DropDownListFor(m => m.Course, new SelectList(ViewBag.SelectCourse, "Name", "Name"), "-- Select Course --", new { Class = "form-control" })
+            @if (ViewBag.CourseDisabled != null && ViewBag.CourseDisabled)
+            {
+                <input type="text" class="form-control" value="Does not exist" disabled />
+            }
+            else
+            {
+                @Html.DropDownListFor(m => m.Course, new SelectList(ViewBag.SelectCourse, "Name", "Name"), "-- Select Course --", new { @class = "form-control" })
+            }
             @Html.ValidationMessageFor(m => m.Course, "", new { @class = "text-danger" })
         </div>
-    <div class="form-group text-right">
-        <!-- Đổi lớp form-group thành text-right để căn phải -->
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="submit" class="btn btn-warning">Cancel</button>
-    </div>
-}
 
+        <div class="form-group text-right">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-warning">Cancel</button>
+        </div>
+    }
 </section>

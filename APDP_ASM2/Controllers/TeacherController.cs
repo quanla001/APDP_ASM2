@@ -23,7 +23,6 @@ namespace APDP_ASM2.Controllers
 
             return RedirectToAction("ManageTeacher");
         }
-
         [HttpGet]
         public IActionResult EditTeacher(int id)
         {
@@ -33,6 +32,19 @@ namespace APDP_ASM2.Controllers
             if (teacher == null)
             {
                 return View("NotFound");
+            }
+
+            var courses = FileHelper.LoadFromFile<List<Course>>("course.json");
+            var courseExists = courses.Any(c => c.Name == teacher.Course);
+
+            if (!courseExists)
+            {
+                teacher.Course = "Does not exist";
+                ViewBag.CourseDisabled = true;
+            }
+            else
+            {
+                ViewBag.CourseDisabled = false;
             }
 
             PopulateViewBags();
@@ -83,10 +95,22 @@ namespace APDP_ASM2.Controllers
             return View();
         }
 
+      
         [HttpGet]
         public IActionResult ManageTeacher(string searchQuery, int page = 1, int pageSize = 5)
         {
             var teachers = FileHelper.LoadFromFile<List<Teacher>>("teacher.json");
+            var courses = FileHelper.LoadFromFile<List<Course>>("course.json");
+            var courseNames = courses.Select(c => c.Name).ToHashSet();
+
+            foreach (var teacher in teachers)
+            {
+                if (!courseNames.Contains(teacher.Course))
+                {
+                    teacher.Course = "Does not exist";
+                }
+            }
+
             if (!string.IsNullOrEmpty(searchQuery))
             {
                 searchQuery = searchQuery.ToLower();

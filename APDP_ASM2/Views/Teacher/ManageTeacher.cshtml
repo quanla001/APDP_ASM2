@@ -3,7 +3,7 @@
     ViewData["Title"] = "ManageTeacher";
     Layout = "~/Views/Shared/LayoutAdmin.cshtml";
 }
-@* <link href="~/admin.css" rel="stylesheet" /> *@
+
 @section header {
     <header class="main-header clearfix" role="header">
         <div class="logo">
@@ -17,8 +17,6 @@
                 <li><a href="/Course/ManageCourse" class="external">Courses Management</a></li>
                 <li><a href="/Class/ManageClass" class="external">Classes Management</a></li>
                 <li><a href="/Authentication/Logout" class="external">Logout</a></li>
-
-
             </ul>
         </nav>
     </header>
@@ -39,34 +37,34 @@
         <a class="btn btn-secondary" asp-controller="Teacher" asp-action="ManageTeacher">Back</a>
     </div>
     <div class="table-responsive">
-          @if (Model != null && Model.Any())
+        @if (Model != null && Model.Any())
         {
-        <table class="table table-bordered table-hover">
-            <thead class="bg-primary text-white">
-                <tr>
-                    <th class="text-center">Name</th>
-                    <th class="text-center">Date of Birth</th>
-                    <th class="text-center">Course</th>
-                    <th class="text-center">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
+            <table class="table table-bordered table-hover">
+                <thead class="bg-primary text-white">
                     <tr>
-                        <td class="text-center">@item.Name</td>
-                        <td class="text-center">@item.DoB</td>
-                        <td class="text-center">@item.Course</td>
-                        <td class="text-center">
-                            <div class="btn-group" role="group">
-                                <a class="btn btn-danger mr-1" href="@Url.Action("Delete","Teacher",new {id=item.Id})">Delete</a>
-                                <a class="btn btn-warning" href="@Url.Action("EditTeacher","Teacher",new {id=item.Id})">Edit</a>
-                            </div>
-                        </td>
+                        <th class="text-center">Name</th>
+                        <th class="text-center">Date of Birth</th>
+                        <th class="text-center">Course</th>
+                        <th class="text-center">Action</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-center">@item.Name</td>
+                            <td class="text-center">@item.DoB</td>
+                            <td class="text-center">@item.Course</td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a class="btn btn-danger mr-1" href="@Url.Action("Delete", "Teacher", new { id = item.Id })">Delete</a>
+                                    <a class="btn btn-warning @(item.Course == "Does not exist" ? "disabled" : "")" href="@Url.Action("EditTeacher", "Teacher", new { id = item.Id })">Edit</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
         else
         {
@@ -78,22 +76,19 @@
             <nav aria-label="Page navigation">
                 <ul class="pagination">
                     <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-                        <a class="page-link" href="@Url.Action("NewTeacher", new { searchQuery = ViewBag.SearchQuery, page = ViewBag.CurrentPage - 1 })" tabindex="-1">Previous</a>
+                        <a class="page-link" href="@Url.Action("ManageTeacher", new { searchQuery = ViewBag.SearchQuery, page = ViewBag.CurrentPage - 1 })" tabindex="-1">Previous</a>
                     </li>
                     @for (int i = 1; i <= ViewBag.TotalPages; i++)
                     {
                         <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
-                            <a class="page-link" href="@Url.Action("NewTeacher", new { searchQuery = ViewBag.SearchQuery, page = i })">@i</a>
+                            <a class="page-link" href="@Url.Action("ManageTeacher", new { searchQuery = ViewBag.SearchQuery, page = i })">@i</a>
                         </li>
                     }
                     <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-                        <a class="page-link" href="@Url.Action("NewTeacher", new { searchQuery = ViewBag.SearchQuery, page = ViewBag.CurrentPage + 1 })">Next</a>
+                        <a class="page-link" href="@Url.Action("ManageTeacher", new { searchQuery = ViewBag.SearchQuery, page = ViewBag.CurrentPage + 1 })">Next</a>
                     </li>
                 </ul>
             </nav>
         </div>
-      
     </div>
 </section>
-
-

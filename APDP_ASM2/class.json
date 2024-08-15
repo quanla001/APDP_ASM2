@@ -16,5 +16,17 @@
     "ClassName": "SE05024",
     "Major": "Marketing",
     "Lecturer": "32"
+  },
+  {
+    "Id": 5,
+    "ClassName": "Test",
+    "Major": "Marketing",
+    "Lecturer": "Nguyen ABC"
+  },
+  {
+    "Id": 6,
+    "ClassName": "Test",
+    "Major": "dw",
+    "Lecturer": "we"
   }
 ]

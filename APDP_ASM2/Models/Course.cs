@@ -15,9 +15,6 @@ namespace APDP_ASM2.Models
         [Required(ErrorMessage = "Major is required")]
         public string Major { get; set; }
 
-        [Required(ErrorMessage = "Lecturer is required")]
-        public string Lecturer { get; set; }
-
         public string Status { get; set; }
 
         public Course()

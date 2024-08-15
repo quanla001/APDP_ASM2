@@ -46,11 +46,7 @@
             @Html.TextBoxFor(m => m.Major, new { Class = "form-control" })
             @Html.ValidationMessageFor(m => m.Major, "", new { @class = "text-danger" })
         </div>
-        <div class="form-group">
-            @Html.LabelFor(m => m.Lecturer, new { Class = "control-label" })
-            @Html.DropDownListFor(m => m.Lecturer, new SelectList(ViewBag.SelectTeacher, "Name", "Name"), "-- Select Lecturer --", new { Class = "form-control" })
-            @Html.ValidationMessageFor(m => m.Lecturer, "", new { @class = "text-danger" })
-        </div>
+       
 
         <div class="form-group">
             @Html.LabelFor(m => m.Status, new { Class = "control-label" })
